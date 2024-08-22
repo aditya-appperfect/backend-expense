@@ -8,7 +8,7 @@ exports.getExpenses = async (req, res) => {
     exp: [],
     total: 0,
   };
-  if (!tag) {
+  if (tag == "all") {
     const expenseResult = await client.query(
       `SELECT * FROM expense WHERE userid='${user.userid}'`
     );
@@ -30,7 +30,7 @@ exports.getExpenses = async (req, res) => {
   client.release();
   return res.status(200).json({
     status: "success",
-    data: data,
+     data,
   });
 };
 
@@ -58,7 +58,6 @@ exports.deleteExpense = async (req, res) => {
   const data = await client.query(
     `DELETE FROM expense WHERE expenseid='${expenseid}' AND userid='${userid}';`
   );
-  console.log(data);
   client.release();
   return res.status(200).json({
     status: "success",
