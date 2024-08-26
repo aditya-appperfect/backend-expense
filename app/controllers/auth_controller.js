@@ -1,6 +1,7 @@
 const { getClient } = require("../../connect");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { query, validationResult, matchedData, body } = require("express-validator");
 
 exports.allUser = async (req, res) => {
   const client = await getClient();
@@ -14,6 +15,10 @@ exports.allUser = async (req, res) => {
 
 exports.signup = async (req, res) => {
   const { email, pass } = req.body;
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.send({ errors: result.array() });
+  }
   const client = await getClient();
   const data = await client.query(`SELECT * FROM users WHERE email='${email}'`);
   const users = data.rows;
@@ -46,7 +51,12 @@ exports.signup = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, pass } = req.body;
+  const {email, pass } = req.body;
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.send({ errors: result.array() });
+  }
+
   const client = await getClient();
   const data = await client.query(`SELECT * FROM users WHERE email='${email}'`);
   client.release();

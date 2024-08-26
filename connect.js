@@ -6,7 +6,7 @@ const pool = new Pool({
   user: "postgres",
   port: 5432,
   password: "App4ever#",
-  database: "expense_tracker",
+  database: "expense",
   max: 10,
   idleTimeoutMillis: 30000,
 });
