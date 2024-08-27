@@ -64,6 +64,12 @@ exports.deleteExpense = async (req, res) => {
     `DELETE FROM expense WHERE expenseid='${expenseid}' AND userid='${id}';`
   );
   client.release();
+  if (!data.rowCount) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Invalid expense id",
+    });
+  }
   return res.status(200).json({
     status: "success",
   });

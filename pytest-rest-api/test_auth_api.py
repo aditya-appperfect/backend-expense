@@ -1,47 +1,41 @@
 import requests
+import pytest
 
-def test_login_correct():
+@pytest.mark.parametrize(
+    "email, password, expected_status_code, expected_status, expected_message",
+    [
+        ("aditya@gmail.com", "123", 200, "success", None),
+        ("aditya@gmail.com", "1234", 400, "fail", "Email or password is incorrect"),
+        ("adityabhat@gmail.com", "123", 400, "fail", "Email dosen't exists"),
+    ]
+)
+def test_login(email, password, expected_status_code, expected_status, expected_message):
     url = "http://localhost:3500/auth/login"
-    data = {"email": "aditya@gmail.com", "pass": "123" }
-    response = requests.post(url, json= data)
-    assert response.status_code == 200 
+    data = {"email": email, "pass": password}
+    response = requests.post(url, json=data)
+    assert response.status_code == expected_status_code
     data = response.json()
-    assert data["status"] == "success"
+    assert data["status"] == expected_status
+    if expected_message:
+        assert data["message"] == expected_message
+        
+        
 
-def test_login_incorrect():
-    url = "http://localhost:3500/auth/login"
-    data = {"email": "aditya@gmail.com", "pass": "1234" }
-    response = requests.post(url, json= data)
-    assert response.status_code == 400 
-    data = response.json()
-    assert data["status"] == "fail"
-    assert data["message"] == "Email or password is incorrect"
-
-def test_login_wrongEmail():
-    url = "http://localhost:3500/auth/login"
-    data = {"email": "adityabhat@gmail.com", "pass": "123" }
-    response = requests.post(url, json = data)
-    assert response.status_code == 400 
-    data = response.json()
-    assert data["status"] == "fail"
-    assert data["message"] == "Email dosen't exists"
-    
-# ----->Data get posts in database
-# def test_signup_correct():
-#     url = "http://localhost:3500/auth/signup"
-#     data = {"email": "aditya14@gmail.com", "pass": "123"}
-#     response = requests.post(url, json = data)
-#     assert response.status_code == 201 
-#     data = response.json()
-#     assert data["status"] == "success"
-#     assert data["Token"] != ""
-
-    
-def test_signup_existingEmail():
+@pytest.mark.parametrize(
+    "email, password, expected_status_code, expected_status, expected_message",
+    [
+        # ("aditya14@gmail.com", "123", 201, "success", None),
+        ("aditya@gmail.com", "123", 400, "fail", "Email already exists"),
+    ]
+)
+def test_signup(email, password, expected_status_code, expected_status, expected_message):
     url = "http://localhost:3500/auth/signup"
-    data = {"email": "aditya@gmail.com", "pass": "123"}
-    response = requests.post(url, json = data)
-    assert response.status_code == 400 
+    data = {"email": email, "pass": password}
+    response = requests.post(url, json=data)
+    assert response.status_code == expected_status_code
     data = response.json()
-    assert data["status"] == "fail"
-    assert data["message"] == "Email already exists"
+    assert data["status"] == expected_status
+    if expected_message:
+        assert data["message"] == expected_message
+    if expected_status_code == 201:
+        assert data["Token"] != ""
