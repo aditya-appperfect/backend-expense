@@ -19,24 +19,26 @@ exports.passValid = () =>
     .matches(/\d/)
     .withMessage("Password must have atleast one number");
 
-exports.validateSchema = () => {
+exports.validateAddExpensesSchema = () => {
   return checkSchema({
-    email: {
-      notEmpty: { errorMessage: "email is required" },
-      isEmail: { errorMessage: "Invalid email format" },
+    title: {
+      notEmpty: { errorMessage: "Title is required" },
+      trim: true,
     },
-    password: {
-      notEmpty: { errorMessage: "password is required" },
-      isLength: {
-        options: { min: 8 },
-        errorMessage: "Password must be of atleast 8 characters",
-      },
-      matches: {
-        options: /\d/,
-        errorMessage: "Password must contain at least one digit",
+    exptype: {
+      notEmpty: { errorMessage: "Expense type is required" },
+      isIn: {
+        options: [["income", "expense"]],
+        errorMessage: "Expense type must be either 'income' or 'expense'",
       },
     },
-    username: { notEmpty: { errorMessage: "Username is required" } },
-    address: { notEmpty: { errorMessage: "address is required" } },
+    amount: {
+      notEmpty: { errorMessage: "Amount is required" },
+      isNumeric: { errorMessage: "Amount must be a number" },
+      custom: {
+        options: (value) => value > 0,
+        errorMessage: "Amount must be a positive number",
+      },
+    },
   });
 };

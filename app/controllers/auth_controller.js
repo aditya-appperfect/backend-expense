@@ -1,7 +1,12 @@
 const { getClient } = require("../../connect");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { query, validationResult, matchedData, body } = require("express-validator");
+const {
+  query,
+  validationResult,
+  matchedData,
+  body,
+} = require("express-validator");
 
 exports.allUser = async (req, res) => {
   const client = await getClient();
@@ -44,14 +49,14 @@ exports.signup = async (req, res) => {
     }
   );
 
-  return res.status(200).json({
+  return res.status(201).json({
     status: "success",
     Token: token,
   });
 };
 
 exports.login = async (req, res) => {
-  const {email, pass } = req.body;
+  const { email, pass } = req.body;
   const result = validationResult(req);
   if (!result.isEmpty()) {
     return res.send({ errors: result.array() });
@@ -107,13 +112,25 @@ exports.protect = async (req, res, next) => {
   }
 
   let decoded = "";
-  jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET, (err, dec) => {
-    if (err) {
-      console.log(err);
-    } else {
-      decoded = dec;
-    }
-  });
+  try {
+    jwt.verify(
+      token,
+      process.env.USER_VERIFICATION_TOKEN_SECRET,
+      (err, dec) => {
+        if (err) {
+          throw err;
+        } else {
+          decoded = dec;
+        }
+      }
+    );
+  } catch (err) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Invalid Token",
+      error: err,
+    });
+  }
 
   const client = await getClient();
   const data = await client.query(

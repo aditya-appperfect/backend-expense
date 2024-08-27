@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const { getClient } = require("../../connect");
 
 exports.getExpenses = async (req, res) => {
@@ -30,13 +31,17 @@ exports.getExpenses = async (req, res) => {
   client.release();
   return res.status(200).json({
     status: "success",
-     data,
+    data,
   });
 };
 
 exports.addExpenses = async (req, res) => {
   const { title, exptype, amount } = req.body;
   const { id } = req.user;
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.send({ errors: result.array() });
+  }
   const client = await getClient();
   if (exptype == "income") {
     await client.query(`INSERT INTO expense (userid, title, exptype, amount)
@@ -46,7 +51,7 @@ exports.addExpenses = async (req, res) => {
     VALUES ('${id}', '${title}', '${exptype}', '-${amount}');`);
   }
   client.release();
-  return res.status(200).json({
+  return res.status(201).json({
     status: "success",
   });
 };
