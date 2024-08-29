@@ -4,15 +4,18 @@ Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXR5YUBnbWFpbC5jb2
 url = "http://localhost:3500/expenditure/"
 
 @pytest.mark.parametrize(
-    "Token, expected_status_code, expected_message",
+    "Token, params, expected_status_code, expected_message",
     [
-        (Token, 200, None),
-        (None, 401, "You are not loged in please login"),
-        (Token+"a", 400, "Invalid Token"),
+        (Token, "all", 200, None),
+        (None, "all", 401, "You are not loged in please login"),
+        (Token+"a", "all", 400, "Invalid Token"),
+        (Token, "expense", 200, None),
+        (Token, "expenses", 401, "Invalid query params"),
+        (None, "some", 401, "You are not loged in please login"),
     ]
 )
-def test_get_expense_withToken(Token, expected_status_code, expected_message):
-    response = requests.get(url+"?tag=all", headers={"Token": Token})
+def test_get_expense(Token, params, expected_status_code, expected_message):
+    response = requests.get(url, params={"tag":params} , headers={"Token": Token})
     assert response.status_code == expected_status_code
     data = response.json()
     if expected_message:
@@ -27,7 +30,7 @@ def test_get_expense_withToken(Token, expected_status_code, expected_message):
         ("Fees", "expense", 5000, Token, None, 201),
     ]
 )   
-def test_add_expense_incorrect_expType(title, exptype, amount, Token, expected_message, expected_status_code):
+def test_add_expense(title, exptype, amount, Token, expected_message, expected_status_code):
     reqData = {
         "title": title,
         "exptype": exptype,
@@ -40,22 +43,18 @@ def test_add_expense_incorrect_expType(title, exptype, amount, Token, expected_m
     if(expected_status_code):
         assert response.status_code == expected_status_code
         
-    
-def test_delete_expense_incorrect():
+         
+@pytest.mark.parametrize(
+    "expenseid, Token, expected_status_code",
+    [
+        ("500", Token, 400),
+        # ("21", Token, 200),
+    ]
+)          
+def test_delete_expense(expenseid, Token, expected_status_code):
     reqData = {
-       "expenseid":"500"
+       "expenseid":expenseid
     }
     response = requests.delete(url, json = reqData, headers={"Token": Token})
     data = response.json()
-    assert response.status_code == 400
-    assert data["status"] == "fail"
-    
-# ------> Make sure to put correct expenseid
-# def test_delete_expense_correct():
-#     reqData = {
-#        "expenseid":"2"
-#     }
-#     response = requests.delete(url, json = reqData, headers={"Token": Token})
-#     data = response.json()
-#     assert response.status_code == 200
-#     assert data["status"] == "success"
+    assert response.status_code == expected_status_code

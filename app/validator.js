@@ -1,4 +1,4 @@
-const { body, checkSchema } = require("express-validator");
+const { body, checkSchema, validationResult } = require("express-validator");
 
 exports.emailValid = () =>
   body("email")
@@ -41,4 +41,12 @@ exports.validateAddExpensesSchema = () => {
       },
     },
   });
+};
+
+exports.handleValidationErrors = (req, res, next) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.send({ errors: result.array() });
+  }
+  next();
 };
