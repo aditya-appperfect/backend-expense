@@ -157,6 +157,7 @@ exports.protect = async (req, res, next) => {
     const text = "SELECT * FROM users WHERE email=$1";
     const values = [decoded?.email];
     const data = await client.query(text, values);
+    client.release();
     const currentUser = data?.rows[0];
 
     if (!currentUser) {

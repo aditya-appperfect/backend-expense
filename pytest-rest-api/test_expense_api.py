@@ -1,6 +1,7 @@
 import requests
 import pytest
 Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXR5YUBnbWFpbC5jb20iLCJpYXQiOjE3MjQ3MzY1MDksImV4cCI6MTczMjUxMjUwOX0.KTV5ZNYYNJoIMvkgdJ29ZK8l0linvBG929WFkDFhC4I"
+TokenAdmin = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcyNDgzNjQ5MCwiZXhwIjoxNzMyNjEyNDkwfQ.QXr4RKVBFgsuBDlDRunw5yePDFHM7bza7_mowtzBlu8"
 url = "http://localhost:3500/expenditure/"
 
 @pytest.mark.parametrize(
@@ -20,6 +21,23 @@ def test_get_expense(Token, params, expected_status_code, expected_message):
     data = response.json()
     if expected_message:
         assert data["message"] == expected_message
+        
+        
+
+@pytest.mark.parametrize(
+    "Token, params, expected_status_code, expected_message",
+    [
+        (TokenAdmin, "all", 200, None),
+        (Token, "all", 403, "Forbidden"),
+    ]
+)
+def test_get_allexpenseAdmin(Token, params, expected_status_code, expected_message):
+    response = requests.get(f'{url}/admin', params={"tag":params} , headers={"Token": Token})
+    assert response.status_code == expected_status_code
+    data = response.json()
+    if expected_message:
+        assert data["message"] == expected_message
+
         
         
 @pytest.mark.parametrize(
